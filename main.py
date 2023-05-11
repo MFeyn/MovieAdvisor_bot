@@ -11,29 +11,30 @@ from config import TOKEN
 plt.style.use('ggplot')
 
 bot = telebot.TeleBot(TOKEN)
+df = pd.read_excel('TestBD_xlsx.xlsx', engine='openpyxl')
 
 
-def send_ranked_list(message, df):
+def send_ranked_list(message, dataframe):
     ranked_list_str = '*Твои фильмы*\n'
-    ranked_list_str += df.sort_values('score', ignore_index=True).head().to_string(columns=['name', 'score'],
-                                                                                   header=False,
-                                                                                   index=True,
-                                                                                   ).replace('  ', ' ')
+    ranked_list_str += dataframe.sort_values('score', ignore_index=True).head().to_string(columns=['name', 'score'],
+                                                                                          header=False,
+                                                                                          index=True,
+                                                                                          ).replace('  ', ' ')
     bot.send_message(message.chat.id, ranked_list_str)
 
 
-def send_ranked_list_more(message, df):
-    ranked_df = df.sort_values('score', ignore_index=True)
+def send_ranked_list_more(message, dataframe):
+    ranked_df = dataframe.sort_values('score', ignore_index=True)
     bot.send_message(message.chat.id, '<b>Твой ТОП 5 фильмов</b>\n', parse_mode='HTML')
     nums = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
     for i in range(0, 5):
-        str = ranked_df.iloc[i]
+        strg = ranked_df.iloc[i]
         bot.send_message(message.chat.id,
-                         '{:<} <b>{:<}</b>, {:<}\n'.format(nums[i], str[0], str[1]) +
-                         '\U0001F30F {:<}\n\U00002B50 {:<}\n'.format(str[2], str[3]) +
+                         '{:<} <b>{:<}</b>, {:<}\n'.format(nums[i], strg[0], strg[1]) +
+                         '\U0001F30F {:<}\n\U00002B50 {:<}\n'.format(strg[2], strg[3]) +
                          '<i>{:<}</i>\n\U000023F3 Продолжительность: {:4<}мин\n'.format(
-                             str[4].replace(']', ' ').replace('[', ' '), str[9]) +
-                         '\U00002B55 {:4<}+\nОписание: {:<}'.format(str[11], str[7]), parse_mode='HTML')
+                             strg[4].replace(']', ' ').replace('[', ' '), strg[9]) +
+                         '\U00002B55 {:4<}+\nОписание: {:<}'.format(strg[11], strg[7]), parse_mode='HTML')
 
 
 @bot.message_handler(commands=['start'])
@@ -422,6 +423,6 @@ def get_new_year(message):
         bot.register_next_step_handler(message, get_rewatch)
 
 
-df = pd.read_excel('TestBD_xlsx.xlsx', engine='openpyxl')
-bot.enable_save_next_step_handlers(delay=4)
-bot.polling()
+if __name__ == '__main__':
+    bot.enable_save_next_step_handlers(delay=4)
+    bot.polling()
